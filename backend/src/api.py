@@ -251,7 +251,7 @@ def ErrBadrequest(error):
 
 
 @app.errorhandler(Err_NotAllowed)
-def ErrBadrequest(error):
+def ErrNotAllowed(error):
     return jsonify({
         "success": False,
         "error": Err_NotAllowed,
