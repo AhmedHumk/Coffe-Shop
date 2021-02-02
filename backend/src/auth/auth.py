@@ -3,7 +3,19 @@ from flask import request, _request_ctx_stack
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
-import const
+
+from ..const import (
+    AUTH0_DOMAIN,
+    ALGORITHM,
+    API_AUDIENCE,
+    Err_Unauth,
+    Err_badrequest,
+    Err_server,
+    Err_unavailable,
+    Err_Notfound,
+    Err_NotAllowed,
+    Err_NotProcessed
+    )
 
 # my auth0 data is in const model
 
@@ -28,7 +40,7 @@ def get_token_auth_header():
         raise AuthError({
             "code": "Authorization_header_is_empty",
             "description": "No Authorization header included"
-            }, const.Err_Unauth)
+            }, Err_Unauth)
     # lets split our authorization_token and check
     # if we have Bearer and token
     split_auth_token = authorization_token.split()
@@ -39,7 +51,7 @@ def get_token_auth_header():
         raise AuthError({
             "code": "invalid_authorization_length",
             "description": "invalid Authorization header length"
-            }, const.Err_Unauth)
+            }, Err_Unauth)
     # if everything is fine lets set
     # our Bearer and token variables
     # [0] for Bearer - [1] for token
@@ -51,7 +63,7 @@ def get_token_auth_header():
         raise AuthError({
             "code": "invalid_header_bearer",
             "description": "the bearer provided is invalid"
-            }, const.Err_Unauth)
+            }, Err_Unauth)
     # if everything is fine then
     # return the token_val
     return token_val
@@ -65,13 +77,13 @@ def check_permissions(permission, payload):
         raise AuthError({
             "code": "invalid_playload",
             "description": "permissions is not included"
-            }, const.Err_badrequest)
+            }, Err_badrequest)
 
     if permission not in payload['permissions']:
         raise AuthError({
             "code": "invalid_playload",
             "description": "permissions is not included"
-            }, const.Err_badrequest)
+            }, Err_badrequest)
     # if everything is fine return true
     return True
     
@@ -93,7 +105,7 @@ def check_permissions(permission, payload):
 def verify_decode_jwt(token):
     # fetch my RSA key from Auth0
     # based on Identity and Authentication lesson
-    Auth0UrL = "https://{}/.well-known/jwks.json".format(const.AUTH0_DOMAIN)
+    Auth0UrL = "https://{}/.well-known/jwks.json".format(AUTH0_DOMAIN)
     getjsonData = urlopen(Auth0UrL)
     # Read our fetched json data
     data_json = json.loads(getjsonData.read())
@@ -103,7 +115,7 @@ def verify_decode_jwt(token):
         raise AuthError({
             "code": "invalid_header",
             "description": "header is not included"
-            }, const.Err_Unauth)
+            }, Err_Unauth)
         
     myrskey = {}
     # lets loop throw data_json
@@ -122,16 +134,16 @@ def verify_decode_jwt(token):
         raise AuthError({
             "code": "invalid_header",
             "description": "header is not included"
-            }, const.Err_Unauth)
+            }, Err_Unauth)
     # if we have a key then
     # lets try to decode our token
     try:
         payload = jwt.decode(
             token,
             myrskey,
-            algorithms=const.ALGORITHM,
-            audience=const.API_AUDIENCE,
-            issuer="https://{}/".format(const.AUTH0_DOMAIN)
+            algorithms=ALGORITHM,
+            audience=API_AUDIENCE,
+            issuer="https://{}/".format(AUTH0_DOMAIN)
             )
         return payload
     
@@ -139,18 +151,18 @@ def verify_decode_jwt(token):
         raise AuthError({
             "code": "invalid_token",
             "description": "this token is invalid"
-            }, const.Err_Unauth)
+            }, Err_Unauth)
     except jwt.JWTClaimsError:
         raise AuthError({
             "code": "invalid_claims",
             "description": "invalid claims"
-            }, const.Err_Unauth)
+            }, Err_Unauth)
     except Exception as E:
         print(E)
         raise AuthError({
             "code": "invalid_header",
             "description": "invalid header"
-            }, const.Err_Unauth)
+            }, Err_Unauth)
 
     
         
