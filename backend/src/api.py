@@ -17,15 +17,15 @@ from .const import (
     Err_Notfound,
     Err_NotAllowed,
     Err_NotProcessed
-    )
+)
 
 app = Flask(__name__)
 setup_db(app)
 # Set our app Cors based on previous course Flask CORS
 #CORS(app, resources={r"/coffe/*": {"origins": "*"}})
 
-#@app.after_request
-#def after_request(response):
+# @app.after_request
+# def after_request(response):
 #    response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
 #    response.headers.add("Access-Control-Allow-Methods", "GET, PUT, PATCH, POST, DELETE, OPTIONS")
 #    response.headers.add("Access-Control-Allow-Credentials", "true")
@@ -38,10 +38,12 @@ CORS(app)
 !! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
 !! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
 '''
-#db_drop_and_create_all()
+# db_drop_and_create_all()
 
-## ROUTES
+# ROUTES
 # Drinks endpoint
+
+
 @app.route("/coffe/drinks")
 def getdrinks():
     try:
@@ -51,25 +53,27 @@ def getdrinks():
         for drinkitem in drinklist:
             # the frontend is excpecting a short format
             drinksarray.append(drinkitem.short())
-            
+
         print(drinksarray)
         return jsonify({
             "drinks": drinksarray,
             "success": True
-            })
-            
+        })
+
     except Exception as E:
         print(E)
         abort(Err_Notfound)
-        
+
 # Drink Details endpoint
 # we need to pass an pyld parameter
 # it has no usage in the function
 # but our requires_auth_decorator
 # in auth.py will return it as payload
+
+
 @app.route("/coffe/drinks-detail")
 @requires_auth(permission='get:drinks-detail')
-def getdrinkdetails(jwt_payload): # apply review more effecit parameter payload name
+def getdrinkdetails(jwt_payload):  # apply review more effecit parameter payload name
     try:
         # lets get our drinks from our database
         drinklist = Drink.query.order_by(Drink.title).all()
@@ -77,23 +81,23 @@ def getdrinkdetails(jwt_payload): # apply review more effecit parameter payload 
         for drinkitem in drinklist:
             # the frontend is excpecting a long format
             drinksarray.append(drinkitem.long())
-            
+
         print(drinksarray)
         return jsonify({
             "drinks": drinksarray,
             "success": True
-            })
-            
+        })
+
     except Exception as E:
         print(E)
         abort(Err_Notfound)
-    
+
 
 # Create a new Drink
 @app.route("/coffe/drinks", methods=["POST"])
 @requires_auth(permission='post:drinks')
 def AddNewDrink(jwt_payload):
-    # get our json data 
+    # get our json data
     jsondata = request.get_json()
     if not jsondata:
         abort(Err_Unauth)
@@ -103,13 +107,13 @@ def AddNewDrink(jwt_payload):
     Newdrinkrecipe = jsondata.get('recipe', None)
     if NewdrinkTitle is None:
         abort(Err_Unauth)
-        
+
     if Newdrinkrecipe is None:
         abort(Err_Unauth)
     # if everything is fine,
     # then lets Encode our drinkrecipe as string,
     # to be suitable for our database recipe column
-    # we will use json.dumps as the following refrence 
+    # we will use json.dumps as the following refrence
     # https://docs.python.org/3/library/json.html
     Newdrinkrecipe = json.dumps(Newdrinkrecipe)
     # now lets try to attempt to insert
@@ -118,12 +122,12 @@ def AddNewDrink(jwt_payload):
         AddDrink_Q = Drink(title=NewdrinkTitle, recipe=Newdrinkrecipe)
         AddDrink_Q.insert()
         CreatedDrink = [AddDrink_Q.long()]
-         # if every thing is fine
-         # then return the Created drink with success true
+        # if every thing is fine
+        # then return the Created drink with success true
         return jsonify({
             "drinks": CreatedDrink,
             "success": True
-            })
+        })
     except Exception as E:
         print(E)
         abort(Err_NotProcessed)
@@ -153,12 +157,12 @@ def ChangeDrinkdata(jwt_payload, drinkid):
     # then abort with 401
     if drinktitle is None:
         abort(Err_Unauth)
-        
+
     if drinkrecipe is None:
         abort(Err_Unauth)
 
     # otherwise lets go ahead and update
-    # we will use json.dumps as the following refrence 
+    # we will use json.dumps as the following refrence
     # https://docs.python.org/3/library/json.html
     drinkrecipe = json.dumps(drinkrecipe)
     # now lets try to attempt to Update
@@ -172,12 +176,12 @@ def ChangeDrinkdata(jwt_payload, drinkid):
         return jsonify({
             "drinks": UpdatedDrink,
             "success": True
-            })
-        
+        })
+
     except Exception as E:
         print(E)
         abort(Err_NotProcessed)
-    
+
 
 # delete a drink
 @app.route("/coffe/drinks/<int:drinkid>", methods=['DELETE'])
@@ -194,73 +198,87 @@ def DeleteDrink(jwt_payload, drinkid):
         return jsonify({
             "delete": drinkid,
             "success": True
-            })
+        })
     except Exception as E:
         print(E)
         abort(Err_NotProcessed)
 
-## Error Handling
+# Error Handling
 # 422 handler
+
+
 @app.errorhandler(Err_NotProcessed)
 def unprocessable(error):
     return jsonify({
-                    "success": False, 
-                    "error": Err_NotProcessed,
-                    "message": "unprocessable"
-                    }), Err_NotProcessed
+        "success": False,
+        "error": Err_NotProcessed,
+        "message": "unprocessable"
+    }), Err_NotProcessed
 # 404 handler
+
+
 @app.errorhandler(Err_Notfound)
 def ErrNotfound(error):
     return jsonify({
-                    "success": False, 
-                    "error": Err_Notfound,
-                    "message": "Not Found"
-                    }), Err_Notfound
+        "success": False,
+        "error": Err_Notfound,
+        "message": "Not Found"
+    }), Err_Notfound
 
 # 401 handler
+
+
 @app.errorhandler(Err_Unauth)
 def ErrunAuth(error):
     return jsonify({
-                    "success": False, 
-                    "error": Err_Unauth,
-                    "message": "unAuthorized attempt"
-                    }), Err_Unauth
+        "success": False,
+        "error": Err_Unauth,
+        "message": "unAuthorized attempt"
+    }), Err_Unauth
 
 # 400 handler
+
+
 @app.errorhandler(Err_badrequest)
 def ErrBadrequest(error):
     return jsonify({
-                    "success": False, 
-                    "error": Err_badrequest,
-                    "message": "bad request"
-                    }), Err_badrequest
+        "success": False,
+        "error": Err_badrequest,
+        "message": "bad request"
+    }), Err_badrequest
 
 # 405 handler
+
+
 @app.errorhandler(Err_NotAllowed)
 def ErrBadrequest(error):
     return jsonify({
-                    "success": False, 
-                    "error": Err_NotAllowed,
-                    "message": "not allowed"
-                    }), Err_NotAllowed
+        "success": False,
+        "error": Err_NotAllowed,
+        "message": "not allowed"
+    }), Err_NotAllowed
 
 # 500 handler
+
+
 @app.errorhandler(Err_server)
 def ErrServer(error):
     return jsonify({
-                    "success": False, 
-                    "error": Err_server,
-                    "message": "Server Error"
-                    }), Err_server
+        "success": False,
+        "error": Err_server,
+        "message": "Server Error"
+    }), Err_server
 
 # 503 handler
+
+
 @app.errorhandler(Err_unavailable)
-def ErrServer(error):
+def ErrServerUnAvailabe(error):
     return jsonify({
-                    "success": False, 
-                    "error": Err_unavailable,
-                    "message": "Server unavailable"
-                    }), Err_unavailable
+        "success": False,
+        "error": Err_unavailable,
+        "message": "Server unavailable"
+    }), Err_unavailable
 
 
 if __name__ == '__main__':
