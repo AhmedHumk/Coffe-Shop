@@ -14,7 +14,7 @@
   "private": true,
   "dependencies": {
     "@angular/common": "^15.2.7",
-    "@angular/core": "^8.2.14",
+    "@angular/core": "^9.1.13",
     "@angular/forms": "^15.2.7",
     "@angular/http": "^7.2.2",
     "@angular/platform-browser": "^15.2.7",
@@ -28,9 +28,9 @@
     "core-js": "^2.5.4",
     "jwt-decode": "^2.2.0",
     "lodash": "^4.17.13",
-    "rxjs": "~6.5.1",
-    "tslib": "^1.9.0",
-    "zone.js": "~0.9.1"
+    "rxjs": "~6.6.7",
+    "tslib": "^1.14.1",
+    "zone.js": "~0.10.3"
   },
   "devDependencies": {
     "@angular-devkit/architect": "^0.1502.6",
@@ -38,9 +38,9 @@
     "@angular-devkit/core": "^15.2.6",
     "@angular-devkit/schematics": "^15.2.6",
     "@angular/cli": "^15.2.6",
-    "@angular/compiler": "~8.2.14",
+    "@angular/compiler": "~9.1.13",
     "@angular/compiler-cli": "^15.2.7",
-    "@angular/language-service": "~8.2.14",
+    "@angular/language-service": "~9.1.13",
     "@ionic/angular-toolkit": "^9.0.0",
     "@types/jasmine": "~2.8.8",
     "@types/jasminewd2": "~2.0.3",
